@@ -9,5 +9,5 @@
 - [ ] ベストパワーカーブ、W/kg、FTP設定値とFTP推定値、NP、IF、TSSを実装し、式・入力条件・単位・制限を文書化する。
 - [ ] CTL、ATL、TSB相当を日次TSSのEWMAで実装する。42日/7日はデフォルト値として扱い、医学的な回復・傷害リスクを断定しない。
 - [ ] FIT処理、既知入力の分析、欠損パワー、短時間、ゼロ値、異常値、重複、巨大ファイル、不正ファイル、RLS回帰、ブラウザ秘密情報検査を実行する。
-- [ ] GitHub連携とVercel公開を行う。ただしGitHub Write権限が復旧するまで、pushと本番デプロイは未検証として扱う。
+- [ ] GitHub連携とVercel公開を行う。ただしGitHub CLIのWrite権限が復旧するまで、pushと本番デプロイは未検証として扱う。SupabaseのLeaked Password ProtectionはProプラン要件のため、Phase 4の必須条件・完了判定から除外する。
 - [x] Strava連携、AIによる計算値の推測、トレーニング文章生成、追加の外部連携はPhase 4では実装しない。
