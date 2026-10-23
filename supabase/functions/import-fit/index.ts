@@ -31,7 +31,10 @@ Deno.serve(async (request) => {
   const raw = new Uint8Array(await request.arrayBuffer())
   const checked = validate(raw)
   if (!checked.ok) return json({ error: checked.reason }, 400)
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!, { global: { headers: { Authorization: auth } } })
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")
+  const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY")
+  if (!supabaseUrl || !supabaseKey) return json({ error: "function_configuration_failed" }, 500)
+  const supabase = createClient(supabaseUrl, supabaseKey, { global: { headers: { Authorization: auth } } })
   const { data: userData, error: userError } = await supabase.auth.getUser()
   if (userError || !userData.user) return json({ error: "unauthorized" }, 401)
   const ownerId = userData.user.id
