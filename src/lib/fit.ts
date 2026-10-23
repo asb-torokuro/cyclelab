@@ -33,7 +33,7 @@ function readNumber(bytes: Uint8Array, offset: number, size: number, baseType: n
   let value = 0
   if (architecture === 0) { for (let i = size - 1; i >= 0; i -= 1) value = value * 256 + bytes[offset + i] } else { for (let i = 0; i < size; i += 1) value = value * 256 + bytes[offset + i] }
   if (invalid != null && value === invalid) return null
-  if (baseType === 0x02 || baseType === 0x83) { const bits = size * 8; const sign = 2 ** (bits - 1); if (value >= sign) value -= 2 ** bits }
+  if (baseType === 0x01 || baseType === 0x83 || baseType === 0x85) { const bits = size * 8; const sign = 2 ** (bits - 1); if (value >= sign) value -= 2 ** bits }
   return value
 }
 
