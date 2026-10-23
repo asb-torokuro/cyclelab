@@ -1,53 +1,52 @@
 # CycleLabをVercelへデプロイする手順
 
-この手順はVercelへの本番デプロイを自動実行しません。Phase 1のコードをVercelで公開できる状態にして、デプロイは利用者が確認した後に実行します。
+## 現在のVercel状態
 
-## 1. Vercelプロジェクトを作成
+Vercelプロジェクト`cyclelab`は作成済みです。プロジェクトIDは`prj_3drpGsVvscAUHehSaZwjmMddFhlY`です。`VITE_SUPABASE_URL`と`VITE_SUPABASE_PUBLISHABLE_KEY`はPreview/Production環境へ登録済みです。Secret Key、Service Role Key、データベースパスワードは登録していません。
 
-Vercel DashboardでGitリポジトリをImportし、Framework PresetはVite、Root Directoryはリポジトリルートを選びます。`vercel.json`がSPA rewrite、セキュリティヘッダー、HTTPS前提の設定を提供します。
+ただし、現在のManus管理GitリモートはVercelがGit連携で取得できるGitHub等のリモートではないため、自動デプロイのGit接続と初回デプロイは完了していません。Vercelプロジェクト作成と環境変数登録までを実行した状態です。
 
-Build Commandは`pnpm build`、Output Directoryは`dist`、Install Commandは`pnpm install --frozen-lockfile`を使用します。Node.jsはVercelのサポート対象LTSを選び、リポジトリの`packageManager`にあるpnpmバージョンと整合させてください。
+## Vercel Dashboardでの初回デプロイ
 
-## 2. Vercelの環境変数
+Vercel Dashboardで`cyclelab`プロジェクトを開き、利用可能なGitHubリポジトリをImportするか、Vercel CLIでこのリポジトリをデプロイします。Git接続を選ぶ場合、Framework PresetはVite、Root Directoryはリポジトリルートを選びます。
 
-Vercel DashboardのProject Settings → Environment Variablesで、PreviewとProductionの必要な環境に次の2つを登録します。
+Build Commandは`pnpm build`、Output Directoryは`dist`、Install Commandは`pnpm install --frozen-lockfile`です。Node.jsはVercelのサポート対象LTSを選び、`package.json`の`packageManager`と整合させます。
+
+## Supabase環境変数
+
+Vercel DashboardのProject Settings → Environment Variablesで、PreviewとProductionに次の2つが登録されていることを確認します。
 
 ```text
 VITE_SUPABASE_URL=https://<project-ref>.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=<Supabase DashboardのPublishable Key>
 ```
 
-`VITE_SUPABASE_URL`はHTTPSのSupabase Project URLだけを設定します。`VITE_SUPABASE_PUBLISHABLE_KEY`にはPublishable Keyだけを設定し、Secret Key、Service Role Key、データベースパスワードは絶対に設定しません。`.env.local`やVercelの値をソースコード・ログ・Gitへコピーしないでください。
+`VITE_SUPABASE_PUBLISHABLE_KEY`はブラウザ公開前提の値だけを使います。Secret Key、Service Role Key、データベースパスワードを`VITE_*`へ設定しないでください。`.env.local`やVercelの値をソースコード、ログ、Gitへコピーしないでください。
 
-Vercelの環境変数はビルド時にViteへ埋め込まれます。したがって、Vercelへ保存するのはブラウザ公開前提のSupabase Publishable Keyだけです。Secret KeyやService Role Keyが必要な機能は、将来サーバー側またはSupabase Edge Functionsなど別の信頼境界を設計してから追加します。
+## Supabase側の許可URL
 
-## 3. Supabase側の許可URL
-
-Supabase DashboardのAuthentication → URL Configurationで、利用するVercel Preview URL・Production URLだけをSite URL / Redirect URLsに登録します。少なくとも次のリダイレクト先が必要です。
+Supabase DashboardのAuthentication → URL Configurationで、実際に利用するVercel Preview URL・Production URLだけをSite URL / Redirect URLsに登録します。少なくとも次のリダイレクト先が必要です。
 
 ```text
 https://<production-domain>/login
 https://<production-domain>/reset-password
 ```
 
-ワイルドカードを広く許可せず、不要になったPreview URLは削除します。メール確認とパスワード再設定を実アカウントで確認する前に、メール確認必須設定とRedirect URLsを確認してください。
+広いワイルドカードは避け、不要なPreview URLは削除します。メール確認必須設定も有効にしてください。
 
-## 4. データベース
+## データベース
 
-`supabase/migrations/202610230001_profiles.sql`を専用のSupabaseプロジェクトへ適用します。適用後、RLSが有効であること、`authenticated`にSELECT/INSERT/UPDATEだけが付与されていること、別ユーザーのプロフィールが読めないことをテストします。Phase 1ではDELETE機能を提供していません。
+`supabase/migrations/202610230001_profiles.sql`と`202610230002_phase3_hardening.sql`を専用のSupabaseプロジェクトへSupabase CLIまたはSQL Editorで適用します。Publishable Keyだけではマイグレーション適用や管理者権限操作は行わないでください。適用後、RLS、policy、grant、外部キー、DELETE拒否、2ユーザー分離を専用テストアカウントで確認します。
 
-## 5. デプロイ前チェック
+## デプロイ前後の確認
 
 ```bash
 pnpm install --frozen-lockfile
 pnpm typecheck
 pnpm lint
+pnpm test -- --run
 pnpm build
 pnpm audit --prod
 ```
 
-デプロイ後は、PCとスマートフォンでログイン、メール確認、ログアウト、パスワード再設定、未認証での`/dashboard`アクセスを確認します。本番デプロイ後のHTTPレスポンスで、`Content-Security-Policy`、`Strict-Transport-Security`、`X-Content-Type-Options`、`X-Frame-Options`、`Referrer-Policy`が付いていることも確認します。
-
-## 現在のセッションでの状態
-
-Vercel連携候補は存在しますが、連携は有効化されていません。本作業ではVercel本番デプロイを実行していません。上記の設定ファイルと手順をコミット後、Vercel連携を有効化してからデプロイしてください。
+デプロイ後は、ログイン、メール確認、ログアウト、パスワード再設定、未認証での`/dashboard`アクセスを確認します。さらに、`Content-Security-Policy`、`Strict-Transport-Security`、`X-Content-Type-Options`、`X-Frame-Options`、`Referrer-Policy`が付くことと、`/dashboard`のSPA rewriteを確認します。
