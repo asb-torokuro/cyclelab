@@ -1,2 +1,15 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'; import { AuthProvider } from './lib/auth'; import { ProtectedRoute } from './components/ProtectedRoute'; import { LoginPage } from './pages/LoginPage'; import { SignupPage } from './pages/SignupPage'; import { CheckEmailPage } from './pages/CheckEmailPage'; import { ForgotPasswordPage } from './pages/ForgotPasswordPage'; import { ResetPasswordPage } from './pages/ResetPasswordPage'; import { DashboardPage } from './pages/DashboardPage'; import './styles.css'
-export default function App(){return <BrowserRouter><AuthProvider><Routes><Route path="/login" element={<LoginPage/>}/><Route path="/signup" element={<SignupPage/>}/><Route path="/check-email" element={<CheckEmailPage/>}/><Route path="/forgot-password" element={<ForgotPasswordPage/>}/><Route path="/reset-password" element={<ResetPasswordPage/>}/><Route element={<ProtectedRoute/>}><Route path="/dashboard" element={<DashboardPage/>}/></Route><Route path="*" element={<Navigate to="/login" replace/>}/></Routes></AuthProvider></BrowserRouter>}
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AuthProvider } from './lib/auth'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { LoginPage } from './pages/LoginPage'
+import { SignupPage } from './pages/SignupPage'
+import { CheckEmailPage } from './pages/CheckEmailPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
+import { DashboardPage } from './pages/DashboardPage'
+import { ImportPage } from './pages/ImportPage'
+import './styles.css'
+
+export default function App() {
+  return <BrowserRouter><AuthProvider><Routes><Route path="/login" element={<LoginPage />} /><Route path="/signup" element={<SignupPage />} /><Route path="/check-email" element={<CheckEmailPage />} /><Route path="/forgot-password" element={<ForgotPasswordPage />} /><Route path="/reset-password" element={<ResetPasswordPage />} /><Route element={<ProtectedRoute />}><Route path="/dashboard" element={<DashboardPage />} /><Route path="/import" element={<ImportPage />} /></Route><Route path="*" element={<Navigate to="/login" replace />} /></Routes></AuthProvider></BrowserRouter>
+}
