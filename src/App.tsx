@@ -8,8 +8,10 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { ImportPage } from './pages/ImportPage'
+import { ActivitiesPage } from './pages/ActivitiesPage'
+import { TrainingPage } from './pages/TrainingPage'
 import './styles.css'
 
 export default function App() {
-  return <BrowserRouter><AuthProvider><Routes><Route path="/login" element={<LoginPage />} /><Route path="/signup" element={<SignupPage />} /><Route path="/check-email" element={<CheckEmailPage />} /><Route path="/forgot-password" element={<ForgotPasswordPage />} /><Route path="/reset-password" element={<ResetPasswordPage />} /><Route element={<ProtectedRoute />}><Route path="/dashboard" element={<DashboardPage />} /><Route path="/import" element={<ImportPage />} /></Route><Route path="*" element={<Navigate to="/login" replace />} /></Routes></AuthProvider></BrowserRouter>
+  return <BrowserRouter><AuthProvider><Routes><Route path="/login" element={<LoginPage />} /><Route path="/signup" element={<SignupPage />} /><Route path="/check-email" element={<CheckEmailPage />} /><Route path="/forgot-password" element={<ForgotPasswordPage />} /><Route path="/reset-password" element={<ResetPasswordPage />} /><Route element={<ProtectedRoute />}><Route path="/dashboard" element={<DashboardPage />} /><Route path="/import" element={<ImportPage />} /><Route path="/activities" element={<ActivitiesPage />} /><Route path="/training" element={<TrainingPage />} /></Route><Route path="*" element={<Navigate to="/login" replace />} /></Routes></AuthProvider></BrowserRouter>
 }
