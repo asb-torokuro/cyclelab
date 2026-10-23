@@ -8,8 +8,12 @@ export function ResetPasswordPage() {
   useEffect(() => {
     if (!supabase) { setError('Supabaseの接続設定が未完了です。'); return }
     let active = true
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => { if (active && (event === 'PASSWORD_RECOVERY' || event === 'INITIAL_SESSION')) setReady(Boolean(session)) })
-    void supabase.auth.getSession().then(({ data, error: authError }) => { if (!active) return; if (authError || !data.session) setError('再設定リンクが無効または期限切れです。'); else setReady(true) }).catch(() => active && setError('再設定リンクを確認できませんでした。'))
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => { if (active && event === 'PASSWORD_RECOVERY') setReady(Boolean(session)) })
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    const code = new URLSearchParams(window.location.search).get('code')
+    const recoveryHash = hash.get('type') === 'recovery' || Boolean(hash.get('access_token'))
+    const exchange = code ? supabase.auth.exchangeCodeForSession(code) : Promise.resolve({ data: { session: null }, error: null })
+    void exchange.then(({ data, error: authError }) => { if (!active) return; if (authError || !data.session) { if (!recoveryHash) setError('再設定リンクが無効または期限切れです。') } else setReady(true) }).catch(() => active && setError('再設定リンクを確認できませんでした。'))
     return () => { active = false; listener.subscription.unsubscribe() }
   }, [])
   async function submit(e: FormEvent) { e.preventDefault(); setError(''); if (password.length < 8 || password !== confirm) { setError('パスワードは8文字以上で、確認欄と一致させてください。'); return } if (!supabase || !ready) return; setBusy(true); try { const { error: authError } = await supabase.auth.updateUser({ password }); if (authError) { setError('パスワードを更新できませんでした。リンクを再発行してください。'); return } await supabase.auth.signOut(); navigate('/login', { replace: true }) } catch { setError('パスワードを更新できませんでした。リンクを再発行してください。') } finally { setBusy(false) } }
