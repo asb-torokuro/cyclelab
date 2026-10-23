@@ -7,7 +7,8 @@ function isValidSupabaseUrl(value: string | undefined): value is string {
   if (!value) return false
   try {
     const parsed = new URL(value)
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+    const isLocalDevelopment = import.meta.env.DEV && (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1')
+    return (parsed.protocol === 'https:' && parsed.hostname.endsWith('.supabase.co')) || (parsed.protocol === 'http:' && isLocalDevelopment)
   } catch {
     return false
   }
